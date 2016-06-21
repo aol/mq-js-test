@@ -1,0 +1,56 @@
+<html>
+<head>
+  <title>Route Midpoint</title>
+  <link rel="stylesheet" href="//cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+  <script src="//cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+  <script src="//www.mapquestapi.com/sdk/leaflet/v1.s/mq-map.js?key=Cmjtd%7Cluur2108n1%2C7w%3Do5-gz8a&"></script>
+  <script src="//www.mapquestapi.com/sdk/leaflet/v1.s/mq-routing.js?key=Cmjtd%7Cluur2108n1%2C7w%3Do5-gz8a&"></script>
+  <script src="midpoint.js"></script>
+  <style>
+    #map { width: 800px; height: 600px; }
+  </style>
+
+</head>
+<body>
+<div id='map'></div>
+
+<script>
+  var map, dir, layer;
+
+  map = L.map('map', {
+    layers: MQ.mapLayer(),
+    center: [ 38.895345, -77.030101 ],
+    zoom: 15
+  });
+
+  dir = MQ.routing.directions();
+
+  dir.route({
+    maxRoutes: 3,
+    timeOverage: 99,
+    locations: [
+      'Boulder, CO',
+      'Erie, CO'
+    ]
+  });
+
+  layer = MQ.routing.routeLayer({
+    directions: dir,
+    fitBounds: true
+  });
+
+  function createBubbles(route){
+    var line = route._polyline;
+
+    var mid = RouteUtilFactory.getMidpoint(line._parts[0]);
+
+    var unproject = map.containerPointToLatLng(L.point(mid.x, mid.y));
+    L.circleMarker(unproject).addTo(map)
+      .addTo(map);
+  }
+  layer.on('altRibbonUpdated', createBubbles);
+  layer.once('routeRibbonUpdated', createBubbles);
+  map.addLayer(layer);
+</script>
+</body>
+</html>
